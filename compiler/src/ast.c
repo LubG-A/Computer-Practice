@@ -1,7 +1,6 @@
 #include "ast.h"
 
 ASTNode * root = NULL;
-token * curr_token;
 
 /** @brief branch AST tree 
  *  @note  Use with allocASTNode
@@ -59,46 +58,46 @@ void printAST(ASTNode * node, int level) {
     
     if(isNonTerminal(node)) {
         switch(node->type.NT) {
-            case PROGRAM: printf("程序：\n"); break;
-            case STATEMENT_LIST: printf("语句串：\n"); break;
-            case STATEMENT: printf("语句：\n"); break;
-            case ASSIGNMENT: printf("赋值语句：\n"); break;
-            case IFELSE: printf("条件语句：\n"); break;
-            case LOOP: printf("循环语句：\n"); break;
-            case EXPRESSION: printf("表达式：\n"); break;
-            case TERM: printf("项：\n"); break;
-            case FACTOR: printf("因子：\n"); break;
-            case CONDITION: printf("条件：\n"); break;
-            case CONDITION_OP: printf("条件运算符：\n"); break;
-            default: printf("未知类型：\n"); break;
+            case PROGRAM: printf("program: \n"); break;
+            case STATEMENT_BLOCK: printf("statement_block: \n"); break;
+            case STATEMENT_LIST: printf("statement_list: \n"); break;
+            case STATEMENT: printf("statement: \n"); break;
+            case ASSIGNMENT: printf("assignment: \n"); break;
+            case IFELSE: printf("ifelse: \n"); break;
+            case LOOP: printf("loop: \n"); break;
+            case EXPRESSION: printf("expression: \n"); break;
+            case TERM: printf("term: \n"); break;
+            case FACTOR: printf("factor: \n"); break;
+            case CONDITION: printf("condition: \n"); break;
+            case CONDITION_OP: printf("condition_op: \n"); break;
+            default: printf("unknown: \n"); break;
         }
     }
     else {
         switch(node->type.T) {
-            case ID: printf("标识符：%s\n", node->value); break;
-            case NUM: printf("数字：%s\n", node->value); break;
-            case BEGIN: printf("开始：%s\n", node->value); break;
-            case IF: printf("如果：%s\n", node->value); break;
-            case THEN: printf("那么：%s\n", node->value); break;
-            case WHILE: printf("当：%s\n", node->value); break;
-            case DO: printf("做：%s\n", node->value); break;
-            case END: printf("结束：%s\n", node->value); break;
-            case ASSIGN: printf("赋值：%s\n", node->value); break;
-            case ADD: printf("加：%s\n", node->value); break;
-            case SUB: printf("减：%s\n", node->value); break;
-            case MUL: printf("乘：%s\n", node->value); break;
-            case DIV: printf("除：%s\n", node->value); break;
-            case COLON: printf("冒号：%s\n", node->value); break;
-            case LT: printf("小于：%s\n", node->value); break;
-            case NEQU: printf("不等于：%s\n", node->value); break;
-            case LE: printf("小于等于：%s\n", node->value); break;
-            case GT: printf("大于：%s\n", node->value); break;
-            case GE: printf("大于等于：%s\n", node->value); break;
-            case EQ: printf("等于：%s\n", node->value); break;
-            case SEMI: printf("分号：%s\n", node->value); break;
-            case LP: printf("左括号：%s\n", node->value); break;
-            case RP: printf("右括号：%s\n", node->value); break;
-            default: printf("未知类型：\n"); break;
+            case ID: printf("identifier: %s\n", node->value); break;
+            case NUM: printf("number: %s\n", node->value); break;
+            case START: printf("start: %s\n", node->value); break;
+            case IF: printf("if: %s\n", node->value); break;
+            case WHILE: printf("while: %s\n", node->value); break;
+            case ASSIGN: printf("assign: %s\n", node->value); break;
+            case ADD: printf("add: %s\n", node->value); break;
+            case SUB: printf("sub: %s\n", node->value); break;
+            case MUL: printf("mul: %s\n", node->value); break;
+            case DIV: printf("div: %s\n", node->value); break;
+            case COLON: printf("colon: %s\n", node->value); break;
+            case LT: printf("lt: %s\n", node->value); break;
+            case NEQU: printf("nequ: %s\n", node->value); break;
+            case LE: printf("le: %s\n", node->value); break;
+            case GT: printf("gt: %s\n", node->value); break;
+            case GE: printf("ge: %s\n", node->value); break;
+            case EQ: printf("eq: %s\n", node->value); break;
+            case SEMI: printf("semi: %s\n", node->value); break;
+            case LP: printf("lp: %s\n", node->value); break;
+            case RP: printf("rp: %s\n", node->value); break;
+            case LB: printf("lb: %s\n", node->value); break;
+            case RB: printf("rb: %s\n", node->value); break;
+            default: printf("unknown: \n"); break;
         }
     }
     for(int i = 0; i < node->childCount; i++)

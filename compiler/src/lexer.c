@@ -3,7 +3,14 @@
 token_read token_reader;
 token token_list[MAX_TOKEN_NUM];
 int token_index = 0;
-const char * keywords[] = {"begin", "if", "then", "while", "do", "end"};
+const char * keywords[] = {"main", "if", "while"};
+const int keywords_count = 3;
+const char * enum2str[] = {
+    "UNDEFINED", "main()", "if", "while", "ID", "number",
+    "+", "-", "*", "/", "<", ">", "<=", ">=", "==", "!=", ":=",
+    "#", ":", ";", "(", ")", "{", "}",
+    "goto", "ifFalse", "L"
+};
 
 /** @brief Check token length
  *  @details Check if the token length is greater than MAX_TOKEN_LENGTH
@@ -60,9 +67,15 @@ int readToken() {
                 token_reader.value[token_reader.offset] = '\0';
                 token_reader.type = ID;
                 // Check if it is a keyword, if it is, then replace the type
-                for(int i = 0; i < 6; i++) {
+                for(int i = 0; i < keywords_count; i++) {
                     if(strcmp(token_reader.value, keywords[i]) == 0) {
-                        token_reader.type = BEGIN + i;
+                        token_reader.type = START + i;
+                        if(i == 0) {
+                            // main()
+                            // Skip the '(' and ')'
+                            getchar();
+                            getchar();
+                        }
                         break;
                     }
                 }
@@ -72,42 +85,46 @@ int readToken() {
     }
 
     // Now check if it is an operator
-    else if (strchr("+-*/<=>;:()", token_reader.c)) {
+    else if (strchr("+-*/<=>;:(){}!", token_reader.c)) {
         token_reader.c = getchar();
-        if(token_reader.c == '=' || token_reader.c == '>') {
+        if(token_reader.c == '=') {
             token_reader.value[token_reader.offset++] = token_reader.c;
             token_reader.value[token_reader.offset] = '\0';
             switch(token_reader.value[0]) {
                 // :=
                 case ':':
-                    if(token_reader.value[1] == '=') token_reader.type = ASSIGN;
-                    else {printf("Lexical Error: Invalid symbol: %s\nDo you mean ':=' ?", token_reader.value);exit(1);}
+                    token_reader.type = ASSIGN;
                     break;
-                // <>
-                case '<':
-                    if(token_reader.value[1] == '>') token_reader.type = NEQU;
-                    else if(token_reader.value[1] == '=') token_reader.type = LE;
-                    else {printf("Lexical Error: Invalid symbol: %s\nDo you mean '<>' or '<=' ?", token_reader.value);exit(1);}
+                // !=
+                case '!':
+                    token_reader.type = NEQU;
                     break;
                 // >=
                 case '>':
-                    if(token_reader.value[1] == '=') token_reader.type = GE;
-                    else {printf("Lexical Error: Invalid symbol: %s\nDo you mean '>=' ?", token_reader.value);exit(1);}
+                    token_reader.type = GE;
+                    break;
+                // <=
+                case '<':
+                    token_reader.type = LE;
+                    break;
+                // ==
+                case '=':
+                    token_reader.type = EQ;
                     break;
                 default:
-                    printf("Lexical Error: Invalid symbol: %s\n", token_reader.value);
-                    exit(1);
+                    printf("Lexical Error: Invalid symbol: %s\nMaybe you mean '!=' or '<=' or '>=' ?", token_reader.value);
             }
         }
         else {
             ungetc(token_reader.c, stdin);
             token_reader.value[token_reader.offset] = '\0';
             switch(token_reader.value[0]) {
+                case '{':token_reader.type = LB;   break;
+                case '}':token_reader.type = RB;   break;
                 case '(':token_reader.type = LP;   break;
                 case ')':token_reader.type = RP;   break;
                 case '<':token_reader.type = LT;   break;
                 case '>':token_reader.type = GT;   break;
-                case '=':token_reader.type = EQ;   break;
                 case '+':token_reader.type = ADD;  break;
                 case '-':token_reader.type = SUB;  break;
                 case '*':token_reader.type = MUL;  break;

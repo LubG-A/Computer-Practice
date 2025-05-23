@@ -2,6 +2,7 @@
 #include "lexer.h"
 #include "parser.h"
 #include "ast.h"
+#include "semantic.h"
 
 int main() {
     Initialize();
@@ -20,9 +21,15 @@ int main() {
 
     // Task 2: Syntax Analysis
     token_index = 0;
-    program();
+    program(root);
 #ifdef DEBUG_PARSER
     printAST(root, 0);
+#endif
+
+    // Task3: Semantic Analysis
+    generate_code(root);
+#ifdef DEBUG_SEMANTIC
+    print_quadruples();
 #endif
 
     return 0;

@@ -9,15 +9,22 @@
 #define MAX_TOKEN_LENGTH 255
 #define MAX_TOKEN_NUM 512
 
+#define MAX_QUADRUPLE 255
+
+#define DEBUG_PARSER
+
 void Initialize();
 
-extern const char * keywords[] = {"begin", "if", "then", "while", "do", "end"};
+extern const char * keywords[];
 
 // Lexical attributes
 typedef enum {
-    SHARP, BEGIN, IF, THEN, WHILE, DO, END, nul7, nul8, nul9, ID, NUM, nul12, 
-    ADD, SUB, MUL, DIV, COLON, ASSIGN, nul19, LT, NEQU, LE, GT, GE, EQ, SEMI, LP, RP, nulldef
+    nulldef, START, IF, WHILE, ID, NUM,
+    ADD, SUB, MUL, DIV, LT, GT, LE, GE, EQ, NEQU, ASSIGN,
+    SHARP, COLON, SEMI, LP, RP, LB, RB,
+    GOTO, IFGOTO, LABEL
 } LEXICON;
+extern const char * enum2str[];
 typedef struct token {
     char* value;
     LEXICON type;
@@ -31,8 +38,8 @@ typedef struct token_read {
 
 // Syntax attributes
 typedef enum {
-    PROGRAM, STATEMENT_LIST, STATEMENT, ASSIGNMENT, IFELSE, LOOP,
-    EXPRESSION, TERM, FACTOR, CONDITION, CONDITION_OP
+    PROGRAM, STATEMENT_BLOCK, STATEMENT_LIST, STATEMENT, ASSIGNMENT, IFELSE,
+    LOOP, EXPRESSION, TERM, FACTOR, CONDITION, CONDITION_OP
 } SYNTAX;
 
 // AST attributes
@@ -42,7 +49,7 @@ typedef union {
 } NT_T;
 typedef struct ASTNode {
     NT_T type;
-    char* value;         // 如果为NULL，则是非终结符
+    char* value;
     int childCount;
     struct ASTNode** children;
 } ASTNode;
@@ -50,5 +57,17 @@ typedef struct ASTNodeList {
     ASTNode* node;
     struct ASTNodeList* next;
 } ASTNodeList;
+
+// Semtantic attributes
+typedef union {
+    char* arg;
+    int label;
+} Result;
+typedef struct {
+    const char * arg1;
+    const char * arg2;
+    Result result;
+    LEXICON op;
+} Quadruple;
 
 #endif

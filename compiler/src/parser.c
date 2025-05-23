@@ -1,13 +1,15 @@
 #include "parser.h"
 #include "ast.h"
 
+token * curr_token;
+
 /** @brief read terminal token in and generate an ASTNode
  *  @param type the expected token type
  */
 ASTNode * readTerminal(LEXICON type) {
     getToken();
     if(curr_token->type != type) {
-        printf("Syntax Error: Expected %d, got '%s'\n", type, curr_token->value);
+        printf("Syntax Error: Expected %s, got '%s'\n", enum2str[type], curr_token->value);
         exit(1);
     }
     ASTNode * node = allocASTNode(curr_token->value);
@@ -29,11 +31,26 @@ ASTNode * readNonTerminal(void (*syntax)(ASTNode *), SYNTAX type) {
 /** @note SELECT(<program> -> begin <statement_list> end) = {begin}
  *  @note No need to look ahead, this is the entrace point of the program
  */
-void program() {
-    branchAST(root, 3);
-    root->children[0] = readTerminal(BEGIN);
-    root->children[1] = readNonTerminal(statement_list, STATEMENT_LIST);
-    root->children[2] = readTerminal(END);
+void program(ASTNode * root) {
+    branchAST(root, 2);
+    root->children[0] = readTerminal(START);
+    root->children[1] = readNonTerminal(statement_block, STATEMENT_BLOCK);
+    return ;
+}
+
+/** @note SELECT(<statement_block> -> '{' <statement_list> '}') = {ID, IF, WHILE}
+ *  @param node the AST node
+ */
+void statement_block(ASTNode * node) {
+    token * look = lookAheadOne();
+    if(look->type != LB) {
+        printf("Syntax Error: Expected '{', but got '%s'\n", look->value);
+        exit(1);
+    }
+    branchAST(node, 3);
+    node->children[0] = readTerminal(LB);
+    node->children[1] = readNonTerminal(statement_list, STATEMENT_LIST);
+    node->children[2] = readTerminal(RB);
     return ;
 }
 
@@ -121,12 +138,10 @@ void ifelse(ASTNode * node) {
         printf("Syntax Error: Expected 'IF', but got '%s'\n", look->value);
         exit(1);
     }
-    branchAST(node, 5);
+    branchAST(node, 3);
     node->children[0] = readTerminal(IF);
     node->children[1] = readNonTerminal(condition, CONDITION);
-    node->children[2] = readTerminal(THEN);
-    node->children[3] = readNonTerminal(statement_list, STATEMENT_LIST);
-    node->children[4] = readTerminal(END);
+    node->children[2] = readNonTerminal(statement_block, STATEMENT_BLOCK);
     return ;
 }
 
@@ -139,12 +154,10 @@ void loop(ASTNode * node) {
         printf("Syntax Error: Expected 'WHILE', but got '%s'\n", look->value);
         exit(1);
     }
-    branchAST(node, 5);
+    branchAST(node, 3);
     node->children[0] = readTerminal(WHILE);
     node->children[1] = readNonTerminal(condition, CONDITION);
-    node->children[2] = readTerminal(DO);
-    node->children[3] = readNonTerminal(statement_list, STATEMENT_LIST);
-    node->children[4] = readTerminal(END);
+    node->children[2] = readNonTerminal(statement_block, STATEMENT_BLOCK);
     return ;
 }
 
@@ -262,7 +275,10 @@ void condition(ASTNode * node) {
         if(look->type != LT && look->type != GT && look->type != EQ && look->type != LE && look->type != GE && look->type != NEQU) {
             break;
         }
-        op = readTerminal(look->type);
+        // A blooddy bug here, according to the grammar, you should use readNonTerminal
+        // to read the condition_op, but I used readTerminal instead.
+        //op = readTerminal(look->type);
+        op = readNonTerminal(condition_op, CONDITION_OP);
         tail = appendASTNodeList(op, tail);
         exp = readNonTerminal(expression, EXPRESSION);
         tail = appendASTNodeList(exp, tail);
